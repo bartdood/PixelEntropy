@@ -68,9 +68,8 @@
     if (sceneName === 'bart-sf.jpg') {
       newMarkers.push({
         id: 'to-ferry',
-        // FIXED: Changed 'content' to 'html'
         html: createLabel('➡ Go to Ferry'),
-        yaw: 0.5, pitch: -0.1,
+        position: { yaw: 0.5, pitch: -0.1 },
         data: { target: 'ferry-sf.jpg' }
       });
     }
@@ -79,9 +78,8 @@
     if (sceneName === 'ferry-sf.jpg') {
       newMarkers.push({
         id: 'to-bridge',
-        // FIXED: Changed 'content' to 'html'
         html: createLabel('➡ Go to Bridge'),
-        yaw: -0.5, pitch: 0,
+        position: { yaw: -0.5, pitch: 0 },
         data: { target: 'bay-bridge-sf.jpg' }
       });
     }
@@ -90,9 +88,8 @@
     if (sceneName === 'bay-bridge-sf.jpg') {
       newMarkers.push({
         id: 'to-bart',
-        // FIXED: Changed 'content' to 'html'
         html: createLabel('⬅ Back to BART'),
-        yaw: 2.8, pitch: 0,
+        position: { yaw: 2.8, pitch: 0 },
         data: { target: 'bart-sf.jpg' }
       });
     }
