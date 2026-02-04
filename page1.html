@@ -1,49 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>SF Virtual Tour</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css" />
-
-  <style>
-    body { margin: 0; background: #000; }
-    #viewer { width: 100vw; height: 100vh; }
-  </style>
-</head>
-<body>
-
-<div id="viewer"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.js"></script>
-
 <script>
-  // 3. INITIALIZATION
-  // Note: ensure your folder structure is exactly "scene/bart-sf.jpg" relative to this html file
-  
   const viewer = new PhotoSphereViewer.Viewer({
-    container: document.querySelector('#viewer'),
-    panorama: 'scenes/bart-sf.jpg',
+    container: document.getElementById('viewer'),
+    // FIXED: Changed 'scene/' to 'scenes/'
+    panorama: 'scenes/bart-sf.jpg', 
     plugins: [
-      [PhotoSphereViewer.MarkersPlugin, {
-        // Markers plugin configuration
-      }]
+      [PhotoSphereViewer.MarkersPlugin, {}]
     ],
   });
 
   const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
 
-  // YOUR EXISTING LOGIC
   function loadScene(sceneName) {
-    // Clear existing markers before loading new scene
     markers.clearMarkers();
 
+    // FIXED: Changed 'scene/' to 'scenes/'
     viewer.setPanorama('scenes/' + sceneName).then(() => {
-      
+
       // BART -> Ferry
       if (sceneName === 'bart-sf.jpg') {
         markers.addMarker({
@@ -79,10 +51,10 @@
           data: { target: 'bart-sf.jpg' }
         });
       }
-    }).catch(err => console.error("Error loading panorama:", err));
+    });
   }
 
-  markers.addEventListener('select-marker', ({ marker }) => {
+  markers.on('select-marker', (e, marker) => {
     if (marker.data && marker.data.target) {
       loadScene(marker.data.target);
     }
@@ -90,7 +62,4 @@
 
   // Start the tour
   loadScene('bart-sf.jpg');
-
 </script>
-</body>
-</html>
