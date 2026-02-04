@@ -28,7 +28,6 @@
 </script>
 
 <script type="module">
-  // These imports ONLY work because of the Import Map above
   import { Viewer } from '@photo-sphere-viewer/core';
   import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 
@@ -42,46 +41,57 @@
 
   const markers = viewer.getPlugin(MarkersPlugin);
 
-  // --- Marker Configuration --- //
-  
-  // Style: Yellow Box with Text
+  // =========================================================
+  //  HUGE MARKER STYLE
+  // =========================================================
   function createLabel(text) {
-    return `<div style="color: yellow; font-weight: bold; font-size: 20px; background: rgba(0,0,0,0.7); padding: 8px; border: 2px solid yellow;">${text}</div>`;
+    // CHANGE SIZE HERE LATER
+    // To make small: change font-size to '20px' and padding to '10px'
+    return `
+      <div style="
+        cursor: pointer;
+        color: black; 
+        font-weight: bold; 
+        font-size: 80px;        /* HUGE TEXT */
+        background: #00ff00;    /* BRIGHT GREEN */
+        padding: 40px;          /* HUGE PADDING */
+        border: 10px solid white; 
+        border-radius: 20px;
+      ">
+        ${text}
+      </div>
+    `;
   }
 
   function getMarkersForScene(sceneName) {
     const newMarkers = [];
 
-    // Scene 1: BART -> go to Ferry
+    // Scene 1: BART
     if (sceneName === 'bart-sf.jpg') {
       newMarkers.push({
         id: 'to-ferry',
         content: createLabel('➡ Go to Ferry'),
-        // Position: Slightly to the right
-        yaw: 0.5, 
-        pitch: -0.1,
+        yaw: 0.5, pitch: -0.1,
         data: { target: 'ferry-sf.jpg' }
       });
     }
 
-    // Scene 2: Ferry -> go to Bridge
+    // Scene 2: Ferry
     if (sceneName === 'ferry-sf.jpg') {
       newMarkers.push({
         id: 'to-bridge',
         content: createLabel('➡ Go to Bridge'),
-        yaw: -0.5, 
-        pitch: 0,
+        yaw: -0.5, pitch: 0,
         data: { target: 'bay-bridge-sf.jpg' }
       });
     }
 
-    // Scene 3: Bridge -> go to BART
+    // Scene 3: Bridge
     if (sceneName === 'bay-bridge-sf.jpg') {
       newMarkers.push({
         id: 'to-bart',
         content: createLabel('⬅ Back to BART'),
-        yaw: 2.8, 
-        pitch: 0,
+        yaw: 2.8, pitch: 0,
         data: { target: 'bart-sf.jpg' }
       });
     }
@@ -90,14 +100,12 @@
 
   // --- Logic to Switch Scenes --- //
 
-  // 1. Add markers when the first scene is ready
   viewer.addEventListener('ready', () => {
     const startScene = 'bart-sf.jpg';
     const startMarkers = getMarkersForScene(startScene);
     startMarkers.forEach(m => markers.addMarker(m));
   }, { once: true });
 
-  // 2. Listen for clicks on markers
   markers.addEventListener('select-marker', ({ marker }) => {
     if (marker.data && marker.data.target) {
       const nextScene = marker.data.target;
