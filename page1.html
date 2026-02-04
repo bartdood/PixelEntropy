@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css" />
 
   <style>
-    body { margin: 0; background: #000; }
+    body { margin: 0; background: #000; font-family: sans-serif; }
     #viewer { width: 100vw; height: 100vh; }
   </style>
 </head>
@@ -17,90 +17,105 @@
 
 <div id="viewer"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+      "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js",
+      "@photo-sphere-viewer/markers-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.module.js"
+    }
+  }
+</script>
 
-<script>
-  // 3. Initialize Viewer
-  const viewer = new PhotoSphereViewer.Viewer({
+<script type="module">
+  // Import the specific parts we need
+  import { Viewer } from '@photo-sphere-viewer/core';
+  import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+
+  const viewer = new Viewer({
     container: document.querySelector('#viewer'),
-    // Note: We use a placeholder here, the real scene loads below
     panorama: 'scenes/bart-sf.jpg', 
     plugins: [
-      [PhotoSphereViewer.MarkersPlugin, {}]
+      [MarkersPlugin, {}]
     ],
   });
 
-  const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
+  const markers = viewer.getPlugin(MarkersPlugin);
 
-  // 4. Function to switch scenes
-  function loadScene(sceneName) {
-    // Remove old markers
-    markers.clearMarkers();
+  // Define Marker Style
+  const redMarkerStyle = {
+    fill: 'rgba(200, 0, 0, 0.8)',
+    stroke: 'white',
+    strokeWidth: '2px',
+  };
 
-    viewer.setPanorama('scenes/' + sceneName).then(() => {
-      
-      // Define a style for our Red Circle Marker
-      const redMarkerStyle = {
-        fill: 'rgba(200, 0, 0, 0.8)',
-        stroke: 'white',
-        strokeWidth: '2px',
-      };
+  // We expose this function to the window so we can call it recursively if needed,
+  // but inside modules, functions are private by default.
+  // We'll write the logic to handle clicks purely via events below.
+  
+  function getMarkersForScene(sceneName) {
+    const newMarkers = [];
 
-      // --- LOGIC: Add markers based on current scene ---
+    // BART -> Ferry
+    if (sceneName === 'bart-sf.jpg') {
+      newMarkers.push({
+        id: 'to-ferry',
+        circle: 20,
+        circleStyle: redMarkerStyle,
+        yaw: 1.0, pitch: -0.1,
+        tooltip: 'Go to Ferry',
+        data: { target: 'ferry-sf.jpg' }
+      });
+    }
 
-      // If at BART, add marker to Ferry
-      if (sceneName === 'bart-sf.jpg') {
-        markers.addMarker({
-          id: 'to-ferry',
-          circle: 20,              // Draw a circle of radius 20
-          circleStyle: redMarkerStyle,
-          yaw: 1.0, pitch: -0.1,   // Position in 3D space
-          tooltip: 'Go to Ferry',
-          data: { target: 'ferry-sf.jpg' }
-        });
-      }
+    // Ferry -> Bay Bridge
+    if (sceneName === 'ferry-sf.jpg') {
+      newMarkers.push({
+        id: 'to-bridge',
+        circle: 20,
+        circleStyle: redMarkerStyle,
+        yaw: -2.2, pitch: -0.1,
+        tooltip: 'Go to Bay Bridge',
+        data: { target: 'bay-bridge-sf.jpg' }
+      });
+    }
 
-      // If at Ferry, add marker to Bridge
-      if (sceneName === 'ferry-sf.jpg') {
-        markers.addMarker({
-          id: 'to-bridge',
-          circle: 20,
-          circleStyle: redMarkerStyle,
-          yaw: -2.2, pitch: -0.1,
-          tooltip: 'Go to Bay Bridge',
-          data: { target: 'bay-bridge-sf.jpg' }
-        });
-      }
-
-      // If at Bridge, add marker to BART
-      if (sceneName === 'bay-bridge-sf.jpg') {
-        markers.addMarker({
-          id: 'to-bart',
-          circle: 20,
-          circleStyle: redMarkerStyle,
-          yaw: 2.8, pitch: -0.1,
-          tooltip: 'Back to BART',
-          data: { target: 'bart-sf.jpg' }
-        });
-      }
-      
-    }).catch(error => {
-      console.error("Error loading panorama:", error);
-      alert("Could not load image: scenes/" + sceneName);
-    });
+    // Bay Bridge -> BART
+    if (sceneName === 'bay-bridge-sf.jpg') {
+      newMarkers.push({
+        id: 'to-bart',
+        circle: 20,
+        circleStyle: redMarkerStyle,
+        yaw: 2.8, pitch: -0.1,
+        tooltip: 'Back to BART',
+        data: { target: 'bart-sf.jpg' }
+      });
+    }
+    return newMarkers;
   }
 
-  // 5. Handle Clicks
+  // Initial Load Logic
+  const initialScene = 'bart-sf.jpg';
+  const initialMarkers = getMarkersForScene(initialScene);
+  initialMarkers.forEach(m => markers.addMarker(m));
+
+  // Handle Marker Clicks
   markers.addEventListener('select-marker', ({ marker }) => {
     if (marker.data && marker.data.target) {
-      loadScene(marker.data.target);
+      const nextScene = marker.data.target;
+      
+      // Change Scene
+      viewer.setPanorama('scenes/' + nextScene).then(() => {
+        // Clear and Add New Markers
+        markers.clearMarkers();
+        const nextMarkers = getMarkersForScene(nextScene);
+        nextMarkers.forEach(m => markers.addMarker(m));
+      }).catch(err => {
+        console.error("Error changing scene:", err);
+        alert("Could not load: " + nextScene);
+      });
     }
   });
-
-  // Start the tour!
-  loadScene('bart-sf.jpg');
 
 </script>
 </body>
