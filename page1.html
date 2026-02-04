@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>360 Photo Viewer</title>
+  <meta charset="UTF-8">
+  <title>SF Virtual Tour</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Photo Sphere Viewer CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.css"
@@ -15,65 +14,90 @@
     body {
       margin: 0;
       background: #000;
-      font-family: sans-serif;
     }
-
     #viewer {
       width: 100vw;
-      height: 90vh;
-    }
-
-    .controls {
-      height: 10vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      background: #111;
-    }
-
-    button {
-      padding: 8px 14px;
-      background: #222;
-      color: #fff;
-      border: 1px solid #444;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    button:hover {
-      background: #444;
+      height: 100vh;
     }
   </style>
 </head>
 <body>
 
-  <div id="viewer"></div>
+<div id="viewer"></div>
 
-  <div class="controls">
-    <button onclick="loadPanorama('bay-bridge-sf.jpg')">Bay Bridge</button>
-    <button onclick="loadPanorama('bart-sf.jpg')">BART</button>
-    <button onclick="loadPanorama('ferry-sf.jpg')">Ferry</button>
-  </div>
+<script src="https://unpkg.com/three/build/three.min.js"></script>
+<script src="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.js"></script>
+<script src="https://unpkg.com/photo-sphere-viewer@5/dist/plugins/markers.js"></script>
 
-  <!-- Photo Sphere Viewer JS -->
-  <script src="https://unpkg.com/three/build/three.min.js"></script>
-  <script src="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.js"></script>
+<script>
+  const viewer = new PhotoSphereViewer.Viewer({
+    container: document.getElementById('viewer'),
+    panorama: 'scene/bart-sf.jpg',
+    plugins: [
+      [PhotoSphereViewer.MarkersPlugin, {}]
+    ],
+  });
 
-  <script>
-    const viewer = new PhotoSphereViewer.Viewer({
-      container: document.getElementById('viewer'),
-      panorama: 'scene/bay-bridge-sf.jpg',
-      navbar: [
-        'zoom',
-        'fullscreen'
-      ],
+  const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
+
+  function loadScene(sceneName) {
+    markers.clearMarkers();
+
+    viewer.setPanorama('scene/' + sceneName).then(() => {
+
+      // BART → Ferry
+      if (sceneName === 'bart-sf.jpg') {
+        markers.addMarker({
+          id: 'to-ferry',
+          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
+          width: 32,
+          height: 32,
+          yaw: 1.0,
+          pitch: -0.1,
+          tooltip: 'Go to Ferry',
+          data: { target: 'ferry-sf.jpg' }
+        });
+      }
+
+      // Ferry → Bay Bridge
+      if (sceneName === 'ferry-sf.jpg') {
+        markers.addMarker({
+          id: 'to-bridge',
+          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
+          width: 32,
+          height: 32,
+          yaw: -2.2,
+          pitch: -0.1,
+          tooltip: 'Go to Bay Bridge',
+          data: { target: 'bay-bridge-sf.jpg' }
+        });
+      }
+
+      // Bay Bridge → BART
+      if (sceneName === 'bay-bridge-sf.jpg') {
+        markers.addMarker({
+          id: 'to-bart',
+          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
+          width: 32,
+          height: 32,
+          yaw: 2.8,
+          pitch: -0.1,
+          tooltip: 'Back to BART',
+          data: { target: 'bart-sf.jpg' }
+        });
+      }
     });
+  }
 
-    function loadPanorama(filename) {
-      viewer.setPanorama('scene/' + filename);
+  markers.on('select-marker', (e, marker) => {
+    if (marker.data && marker.data.target) {
+      loadScene(marker.data.target);
     }
-  </script>
+  });
+
+  // Start the tour at BART
+  loadScene('bart-sf.jpg');
+</script>
 
 </body>
 </html>
