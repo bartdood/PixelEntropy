@@ -1,44 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>360 View – Bay Bridge</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>360 Photo Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Pannellum -->
+  <!-- Photo Sphere Viewer CSS -->
   <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+    href="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.css"
   />
-  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
   <style>
-    html, body {
+    body {
       margin: 0;
-      height: 100%;
       background: #000;
+      font-family: sans-serif;
     }
 
-    #panorama {
+    #viewer {
       width: 100vw;
-      height: 100vh;
+      height: 90vh;
+    }
+
+    .controls {
+      height: 10vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+    }
+
+    button {
+      padding: 8px 14px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #444;
     }
   </style>
 </head>
-
 <body>
 
-<div id="panorama"></div>
+  <div id="viewer"></div>
 
-<script>
-pannellum.viewer('panorama', {
-  type: "equirectangular",
-  panorama: "scenes/bay-bridge-sf.jpg",
-  autoLoad: true,
-  showControls: true,
-  compass: true
-});
-</script>
+  <div class="controls">
+    <button onclick="loadPanorama('bay-bridge-sf.jpg')">Bay Bridge</button>
+    <button onclick="loadPanorama('bart-sf.jpg')">BART</button>
+    <button onclick="loadPanorama('ferry-sf.jpg')">Ferry</button>
+  </div>
+
+  <!-- Photo Sphere Viewer JS -->
+  <script src="https://unpkg.com/three/build/three.min.js"></script>
+  <script src="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.js"></script>
+
+  <script>
+    const viewer = new PhotoSphereViewer.Viewer({
+      container: document.getElementById('viewer'),
+      panorama: 'scene/bay-bridge-sf.jpg',
+      navbar: [
+        'zoom',
+        'fullscreen'
+      ],
+    });
+
+    function loadPanorama(filename) {
+      viewer.setPanorama('scene/' + filename);
+    }
+  </script>
 
 </body>
 </html>
