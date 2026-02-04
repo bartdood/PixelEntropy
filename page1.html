@@ -1,7 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SF Virtual Tour</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css" />
+
+  <style>
+    body { margin: 0; background: #000; }
+    #viewer { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.js"></script>
+
 <script>
+  // 3. Initialize Viewer
   const viewer = new PhotoSphereViewer.Viewer({
-    container: document.getElementById('viewer'),
-    // FIXED: Changed 'scene/' to 'scenes/'
+    container: document.querySelector('#viewer'),
+    // Note: We use a placeholder here, the real scene loads below
     panorama: 'scenes/bart-sf.jpg', 
     plugins: [
       [PhotoSphereViewer.MarkersPlugin, {}]
@@ -10,67 +34,74 @@
 
   const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
 
-function loadScene(sceneName) {
+  // 4. Function to switch scenes
+  function loadScene(sceneName) {
+    // Remove old markers
     markers.clearMarkers();
 
     viewer.setPanorama('scenes/' + sceneName).then(() => {
       
-      // Marker Options (Red Circle)
-      const markerStyle = {
-        fill: 'rgba(255, 0, 0, 0.8)',
+      // Define a style for our Red Circle Marker
+      const redMarkerStyle = {
+        fill: 'rgba(200, 0, 0, 0.8)',
         stroke: 'white',
         strokeWidth: '2px',
       };
 
-      // BART -> Ferry
+      // --- LOGIC: Add markers based on current scene ---
+
+      // If at BART, add marker to Ferry
       if (sceneName === 'bart-sf.jpg') {
         markers.addMarker({
           id: 'to-ferry',
-          // REPLACE IMAGE WITH CIRCLE
-          circle: 20,
-          circleStyle: markerStyle,
-          // Position
-          yaw: 1.0, 
-          pitch: -0.1,
+          circle: 20,              // Draw a circle of radius 20
+          circleStyle: redMarkerStyle,
+          yaw: 1.0, pitch: -0.1,   // Position in 3D space
           tooltip: 'Go to Ferry',
           data: { target: 'ferry-sf.jpg' }
         });
       }
 
-      // Ferry -> Bay Bridge
+      // If at Ferry, add marker to Bridge
       if (sceneName === 'ferry-sf.jpg') {
         markers.addMarker({
           id: 'to-bridge',
           circle: 20,
-          circleStyle: markerStyle,
-          yaw: -2.2,
-          pitch: -0.1,
+          circleStyle: redMarkerStyle,
+          yaw: -2.2, pitch: -0.1,
           tooltip: 'Go to Bay Bridge',
           data: { target: 'bay-bridge-sf.jpg' }
         });
       }
 
-      // Bay Bridge -> BART
+      // If at Bridge, add marker to BART
       if (sceneName === 'bay-bridge-sf.jpg') {
         markers.addMarker({
           id: 'to-bart',
           circle: 20,
-          circleStyle: markerStyle,
-          yaw: 2.8,
-          pitch: -0.1,
+          circleStyle: redMarkerStyle,
+          yaw: 2.8, pitch: -0.1,
           tooltip: 'Back to BART',
           data: { target: 'bart-sf.jpg' }
         });
       }
+      
+    }).catch(error => {
+      console.error("Error loading panorama:", error);
+      alert("Could not load image: scenes/" + sceneName);
     });
   }
 
-  markers.on('select-marker', (e, marker) => {
+  // 5. Handle Clicks
+  markers.addEventListener('select-marker', ({ marker }) => {
     if (marker.data && marker.data.target) {
       loadScene(marker.data.target);
     }
   });
 
-  // Start the tour
+  // Start the tour!
   loadScene('bart-sf.jpg');
+
 </script>
+</body>
+</html>
