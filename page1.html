@@ -27,7 +27,7 @@
   
   const viewer = new PhotoSphereViewer.Viewer({
     container: document.querySelector('#viewer'),
-    panorama: 'scene/bart-sf.jpg',
+    panorama: 'scenes/bart-sf.jpg',
     plugins: [
       [PhotoSphereViewer.MarkersPlugin, {
         // Markers plugin configuration
@@ -42,7 +42,7 @@
     // Clear existing markers before loading new scene
     markers.clearMarkers();
 
-    viewer.setPanorama('scene/' + sceneName).then(() => {
+    viewer.setPanorama('scenes/' + sceneName).then(() => {
       
       // BART -> Ferry
       if (sceneName === 'bart-sf.jpg') {
