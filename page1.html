@@ -11,11 +11,43 @@
   <style>
     body { margin: 0; background: #000; font-family: sans-serif; }
     #viewer { width: 100vw; height: 100vh; }
+    
+    /* Loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loading-overlay.active {
+      display: flex;
+    }
+    .loading-spinner {
+      border: 8px solid #333;
+      border-top: 8px solid #00ff00;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
 <div id="viewer"></div>
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
 
 <script type="importmap">
 {
@@ -31,32 +63,40 @@
   import { Viewer } from '@photo-sphere-viewer/core';
   import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 
-  const viewer = new Viewer({
-    container: document.querySelector('#viewer'),
-    panorama: 'scenes/bart-sf.jpg', 
-    plugins: [
-      [MarkersPlugin, {}]
-    ],
-  });
+  let viewer;
+  let markers;
 
-  const markers = viewer.getPlugin(MarkersPlugin);
+  try {
+    viewer = new Viewer({
+      container: document.querySelector('#viewer'),
+      panorama: 'scenes/bart-sf.jpg', 
+      plugins: [
+        [MarkersPlugin, {}]
+      ],
+      loadingImg: null,
+      navbar: false,
+    });
+
+    markers = viewer.getPlugin(MarkersPlugin);
+  } catch (err) {
+    console.error('Error initializing viewer:', err);
+    alert('Error initializing the virtual tour. Please check that all panorama images are in the scenes/ folder.');
+  }
 
   // =========================================================
-  //  HUGE MARKER STYLE
+  //  SMALL GREEN CIRCLE MARKER STYLE
   // =========================================================
   function createLabel(text) {
     return `
       <div style="
         cursor: pointer;
-        color: black; 
-        font-weight: bold; 
-        font-size: 80px;        /* HUGE TEXT */
-        background: #00ff00;    /* BRIGHT GREEN */
-        padding: 40px;          /* HUGE PADDING */
-        border: 10px solid white; 
-        border-radius: 20px;
-      ">
-        ${text}
+        width: 40px;
+        height: 40px;
+        background: #00ff00;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      " title="${text}">
       </div>
     `;
   }
@@ -98,26 +138,42 @@
 
   // --- Logic to Switch Scenes --- //
 
-  viewer.addEventListener('ready', () => {
-    const startScene = 'bart-sf.jpg';
-    const startMarkers = getMarkersForScene(startScene);
-    startMarkers.forEach(m => markers.addMarker(m));
-  }, { once: true });
+  if (viewer && markers) {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    viewer.addEventListener('ready', () => {
+      const startScene = 'bart-sf.jpg';
+      const startMarkers = getMarkersForScene(startScene);
+      startMarkers.forEach(m => markers.addMarker(m));
+    }, { once: true });
 
-  markers.addEventListener('select-marker', ({ marker }) => {
-    if (marker.data && marker.data.target) {
-      const nextScene = marker.data.target;
-      
-      viewer.setPanorama('scenes/' + nextScene).then(() => {
+    markers.addEventListener('select-marker', ({ marker }) => {
+      if (marker.data && marker.data.target) {
+        const nextScene = marker.data.target;
+        
+        // Show loading overlay
+        loadingOverlay.classList.add('active');
+        
+        // Clear markers during transition
         markers.clearMarkers();
-        const nextMarkers = getMarkersForScene(nextScene);
-        nextMarkers.forEach(m => markers.addMarker(m));
-      }).catch(err => {
-        console.error(err);
-        alert("Error loading: scenes/" + nextScene);
-      });
-    }
-  });
+        
+        viewer.setPanorama('scenes/' + nextScene).then(() => {
+          const nextMarkers = getMarkersForScene(nextScene);
+          nextMarkers.forEach(m => markers.addMarker(m));
+          // Hide loading overlay
+          loadingOverlay.classList.remove('active');
+        }).catch(err => {
+          console.error('Error loading scene:', err);
+          loadingOverlay.classList.remove('active');
+          alert("Error loading: scenes/" + nextScene + "\n\nPlease check that the image file exists.");
+          // Try to restore previous scene markers if load fails
+          const currentScene = viewer.config.panorama.split('/').pop();
+          const currentMarkers = getMarkersForScene(currentScene);
+          currentMarkers.forEach(m => markers.addMarker(m));
+        });
+      }
+    });
+  }
 
 </script>
 </body>
