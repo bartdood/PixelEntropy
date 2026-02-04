@@ -10,19 +10,28 @@
 
   const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
 
-  function loadScene(sceneName) {
+function loadScene(sceneName) {
     markers.clearMarkers();
 
-    // FIXED: Changed 'scene/' to 'scenes/'
     viewer.setPanorama('scenes/' + sceneName).then(() => {
+      
+      // Marker Options (Red Circle)
+      const markerStyle = {
+        fill: 'rgba(255, 0, 0, 0.8)',
+        stroke: 'white',
+        strokeWidth: '2px',
+      };
 
       // BART -> Ferry
       if (sceneName === 'bart-sf.jpg') {
         markers.addMarker({
           id: 'to-ferry',
-          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
-          width: 32,
-          height: 32,
+          // REPLACE IMAGE WITH CIRCLE
+          circle: 20,
+          circleStyle: markerStyle,
+          // Position
+          yaw: 1.0, 
+          pitch: -0.1,
           tooltip: 'Go to Ferry',
           data: { target: 'ferry-sf.jpg' }
         });
@@ -32,9 +41,10 @@
       if (sceneName === 'ferry-sf.jpg') {
         markers.addMarker({
           id: 'to-bridge',
-          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
-          width: 32,
-          height: 32,
+          circle: 20,
+          circleStyle: markerStyle,
+          yaw: -2.2,
+          pitch: -0.1,
           tooltip: 'Go to Bay Bridge',
           data: { target: 'bay-bridge-sf.jpg' }
         });
@@ -44,9 +54,10 @@
       if (sceneName === 'bay-bridge-sf.jpg') {
         markers.addMarker({
           id: 'to-bart',
-          image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
-          width: 32,
-          height: 32,
+          circle: 20,
+          circleStyle: markerStyle,
+          yaw: 2.8,
+          pitch: -0.1,
           tooltip: 'Back to BART',
           data: { target: 'bart-sf.jpg' }
         });
