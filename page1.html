@@ -5,99 +5,92 @@
   <title>SF Virtual Tour</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css" />
 
   <style>
-    body {
-      margin: 0;
-      background: #000;
-    }
-    #viewer {
-      width: 100vw;
-      height: 100vh;
-    }
+    body { margin: 0; background: #000; }
+    #viewer { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
 
 <div id="viewer"></div>
 
-<script src="https://unpkg.com/three/build/three.min.js"></script>
-<script src="https://unpkg.com/photo-sphere-viewer@5/dist/photo-sphere-viewer.js"></script>
-<script src="https://unpkg.com/photo-sphere-viewer@5/dist/plugins/markers.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.js"></script>
 
 <script>
+  // 3. INITIALIZATION
+  // Note: ensure your folder structure is exactly "scene/bart-sf.jpg" relative to this html file
+  
   const viewer = new PhotoSphereViewer.Viewer({
-    container: document.getElementById('viewer'),
+    container: document.querySelector('#viewer'),
     panorama: 'scene/bart-sf.jpg',
     plugins: [
-      [PhotoSphereViewer.MarkersPlugin, {}]
+      [PhotoSphereViewer.MarkersPlugin, {
+        // Markers plugin configuration
+      }]
     ],
   });
 
   const markers = viewer.getPlugin(PhotoSphereViewer.MarkersPlugin);
 
+  // YOUR EXISTING LOGIC
   function loadScene(sceneName) {
+    // Clear existing markers before loading new scene
     markers.clearMarkers();
 
     viewer.setPanorama('scene/' + sceneName).then(() => {
-
-      // BART → Ferry
+      
+      // BART -> Ferry
       if (sceneName === 'bart-sf.jpg') {
         markers.addMarker({
           id: 'to-ferry',
           image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
           width: 32,
           height: 32,
-          yaw: 1.0,
-          pitch: -0.1,
           tooltip: 'Go to Ferry',
           data: { target: 'ferry-sf.jpg' }
         });
       }
 
-      // Ferry → Bay Bridge
+      // Ferry -> Bay Bridge
       if (sceneName === 'ferry-sf.jpg') {
         markers.addMarker({
           id: 'to-bridge',
           image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
           width: 32,
           height: 32,
-          yaw: -2.2,
-          pitch: -0.1,
           tooltip: 'Go to Bay Bridge',
           data: { target: 'bay-bridge-sf.jpg' }
         });
       }
 
-      // Bay Bridge → BART
+      // Bay Bridge -> BART
       if (sceneName === 'bay-bridge-sf.jpg') {
         markers.addMarker({
           id: 'to-bart',
           image: 'https://cdn-icons-png.flaticon.com/512/709/709586.png',
           width: 32,
           height: 32,
-          yaw: 2.8,
-          pitch: -0.1,
           tooltip: 'Back to BART',
           data: { target: 'bart-sf.jpg' }
         });
       }
-    });
+    }).catch(err => console.error("Error loading panorama:", err));
   }
 
-  markers.on('select-marker', (e, marker) => {
+  markers.addEventListener('select-marker', ({ marker }) => {
     if (marker.data && marker.data.target) {
       loadScene(marker.data.target);
     }
   });
 
-  // Start the tour at BART
+  // Start the tour
   loadScene('bart-sf.jpg');
-</script>
 
+</script>
 </body>
 </html>
