@@ -45,8 +45,6 @@
   //  HUGE MARKER STYLE
   // =========================================================
   function createLabel(text) {
-    // CHANGE SIZE HERE LATER
-    // To make small: change font-size to '20px' and padding to '10px'
     return `
       <div style="
         cursor: pointer;
@@ -70,7 +68,8 @@
     if (sceneName === 'bart-sf.jpg') {
       newMarkers.push({
         id: 'to-ferry',
-        content: createLabel('➡ Go to Ferry'),
+        // FIXED: Changed 'content' to 'html'
+        html: createLabel('➡ Go to Ferry'),
         yaw: 0.5, pitch: -0.1,
         data: { target: 'ferry-sf.jpg' }
       });
@@ -80,7 +79,8 @@
     if (sceneName === 'ferry-sf.jpg') {
       newMarkers.push({
         id: 'to-bridge',
-        content: createLabel('➡ Go to Bridge'),
+        // FIXED: Changed 'content' to 'html'
+        html: createLabel('➡ Go to Bridge'),
         yaw: -0.5, pitch: 0,
         data: { target: 'bay-bridge-sf.jpg' }
       });
@@ -90,7 +90,8 @@
     if (sceneName === 'bay-bridge-sf.jpg') {
       newMarkers.push({
         id: 'to-bart',
-        content: createLabel('⬅ Back to BART'),
+        // FIXED: Changed 'content' to 'html'
+        html: createLabel('⬅ Back to BART'),
         yaw: 2.8, pitch: 0,
         data: { target: 'bart-sf.jpg' }
       });
