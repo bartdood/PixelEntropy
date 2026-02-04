@@ -1,4 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SF Virtual Tour</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.min.css" />
+
+  <style>
+    body { margin: 0; background: #000; font-family: sans-serif; }
+    #viewer { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+    "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js",
+    "@photo-sphere-viewer/markers-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin/index.module.js"
+  }
+}
+</script>
+
 <script type="module">
+  // These imports ONLY work because of the Import Map above
   import { Viewer } from '@photo-sphere-viewer/core';
   import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 
@@ -12,84 +42,77 @@
 
   const markers = viewer.getPlugin(MarkersPlugin);
 
-  // Debug Style: Bright Yellow with Text
-  const debugMarkerStyle = {
-    fill: 'yellow',
-    stroke: 'black',
-    strokeWidth: '2px',
-  };
+  // --- Marker Configuration --- //
+  
+  // Style: Yellow Box with Text
+  function createLabel(text) {
+    return `<div style="color: yellow; font-weight: bold; font-size: 20px; background: rgba(0,0,0,0.7); padding: 8px; border: 2px solid yellow;">${text}</div>`;
+  }
 
   function getMarkersForScene(sceneName) {
-    console.log("Generating markers for:", sceneName); // DEBUG LOG
     const newMarkers = [];
 
+    // Scene 1: BART -> go to Ferry
     if (sceneName === 'bart-sf.jpg') {
       newMarkers.push({
         id: 'to-ferry',
-        // REPLACED: Circle with explicit "content" (HTML text)
-        // This creates a visible label instead of just a shape
-        content: '<b style="color: yellow; font-size: 20px; background: black; padding: 5px;">➡ Go to Ferry</b>',
-        yaw: 0.2, // Almost center
-        pitch: 0, // Eye level
-        tooltip: 'Go to Ferry',
+        content: createLabel('➡ Go to Ferry'),
+        // Position: Slightly to the right
+        yaw: 0.5, 
+        pitch: -0.1,
         data: { target: 'ferry-sf.jpg' }
       });
     }
 
+    // Scene 2: Ferry -> go to Bridge
     if (sceneName === 'ferry-sf.jpg') {
       newMarkers.push({
         id: 'to-bridge',
-        circle: 30, // Bigger circle
-        circleStyle: debugMarkerStyle,
+        content: createLabel('➡ Go to Bridge'),
         yaw: -0.5, 
         pitch: 0,
-        tooltip: 'Go to Bay Bridge',
         data: { target: 'bay-bridge-sf.jpg' }
       });
     }
 
+    // Scene 3: Bridge -> go to BART
     if (sceneName === 'bay-bridge-sf.jpg') {
       newMarkers.push({
         id: 'to-bart',
-        circle: 30,
-        circleStyle: debugMarkerStyle,
-        yaw: 0, 
+        content: createLabel('⬅ Back to BART'),
+        yaw: 2.8, 
         pitch: 0,
-        tooltip: 'Back to BART',
         data: { target: 'bart-sf.jpg' }
       });
     }
     return newMarkers;
   }
 
-  // --- SAFETY CHECK: Wait for viewer to be ready ---
+  // --- Logic to Switch Scenes --- //
+
+  // 1. Add markers when the first scene is ready
   viewer.addEventListener('ready', () => {
-    console.log("Viewer ready. Adding initial markers...");
-    const initialScene = 'bart-sf.jpg';
-    const initialMarkers = getMarkersForScene(initialScene);
-    
-    initialMarkers.forEach(m => {
-      console.log("Adding marker:", m.id);
-      markers.addMarker(m);
-    });
+    const startScene = 'bart-sf.jpg';
+    const startMarkers = getMarkersForScene(startScene);
+    startMarkers.forEach(m => markers.addMarker(m));
   }, { once: true });
 
-  // Handle Clicks
+  // 2. Listen for clicks on markers
   markers.addEventListener('select-marker', ({ marker }) => {
-    console.log("Clicked marker:", marker.id);
     if (marker.data && marker.data.target) {
       const nextScene = marker.data.target;
       
       viewer.setPanorama('scenes/' + nextScene).then(() => {
-        console.log("Scene loaded:", nextScene);
         markers.clearMarkers();
         const nextMarkers = getMarkersForScene(nextScene);
         nextMarkers.forEach(m => markers.addMarker(m));
       }).catch(err => {
-        console.error("Error changing scene:", err);
-        alert("Could not load: scenes/" + nextScene);
+        console.error(err);
+        alert("Error loading: scenes/" + nextScene);
       });
     }
   });
 
 </script>
+</body>
+</html>
