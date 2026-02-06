@@ -117,6 +117,16 @@ function createLabel(text) {
     // Scene 2: Ferry
     if (sceneName === 'ferry-sf.jpg') {
       newMarkers.push({
+        id: 'to-pier',
+        html: createLabel('➡ Go to Pier'),
+        position: { yaw: 1.0, pitch: 0 },
+        data: { target: 'pier-sf.jpg' }
+      });
+    }
+
+    // Scene 2: pier
+    if (sceneName === 'pier-sf.jpg') {
+      newMarkers.push({
         id: 'to-bridge',
         html: createLabel('➡ Go to Bridge'),
         position: { yaw: 1.0, pitch: 0 },
