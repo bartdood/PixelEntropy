@@ -127,9 +127,21 @@
     // Scene 3: Bridge
     if (sceneName === 'bay-bridge-sf.jpg') {
       newMarkers.push({
+        id: 'to-emb',
+        html: createLabel('⬅ Go to emb'),
+        position: { yaw: 2.8, pitch: 0 },
+        data: { target: 'emb-end.jpg' }
+      });
+    }
+    return newMarkers;
+  }
+
+      // Scene 3: Bridge
+    if (sceneName === 'emb-end.jpg') {
+      newMarkers.push({
         id: 'to-bart',
         html: createLabel('⬅ Back to BART'),
-        position: { yaw: 2.8, pitch: 0 },
+        position: { yaw: 0, pitch: 0 },
         data: { target: 'bart-sf.jpg' }
       });
     }
