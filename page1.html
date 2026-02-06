@@ -84,22 +84,22 @@
   }
 
   // =========================================================
-  //  SMALL GREEN CIRCLE MARKER STYLE
+  //  SMALL yellow
   // =========================================================
-  function createLabel(text) {
-    return `
-      <div style="
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        background: #00ff00;
-        border: 3px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-      " title="${text}">
-      </div>
-    `;
-  }
+function createLabel(text) {
+  return `
+    <div style="
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+      background: #ffd400;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(255, 212, 0, 0.6);
+    " title="${text}">
+    </div>
+  `;
+}
 
   function getMarkersForScene(sceneName) {
     const newMarkers = [];
@@ -109,7 +109,7 @@
       newMarkers.push({
         id: 'to-ferry',
         html: createLabel('➡ Go to Ferry'),
-        position: { yaw: 0.5, pitch: -0.1 },
+        position: { yaw: 0.0, pitch: 0.0 },
         data: { target: 'ferry-sf.jpg' }
       });
     }
@@ -119,7 +119,7 @@
       newMarkers.push({
         id: 'to-bridge',
         html: createLabel('➡ Go to Bridge'),
-        position: { yaw: -0.5, pitch: 0 },
+        position: { yaw: 1.0, pitch: 0 },
         data: { target: 'bay-bridge-sf.jpg' }
       });
     }
